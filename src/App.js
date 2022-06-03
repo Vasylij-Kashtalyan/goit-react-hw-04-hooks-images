@@ -1,4 +1,4 @@
-import { fetchPicturesWithQuery } from "./api/Fetch.js";
+import { API } from "./api/Fetch.js";
 import React, { Component } from "react";
 import { ToastContainer } from "react-toastify";
 import ImageGallery from "./components/ImageGallery";
@@ -18,7 +18,7 @@ class App extends Component {
     page: 1,
   };
 
-  async componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(prevProps, prevState) {
     const nextName = this.state.name;
     const nextPage = this.state.page;
 
@@ -26,7 +26,7 @@ class App extends Component {
       if (prevState.name !== nextName || prevState.page !== nextPage) {
         this.setState({ loading: true });
 
-        await fetchPicturesWithQuery(nextName, nextPage).then((pictures) => {
+        API(nextName, nextPage).then((pictures) => {
           this.setState({ loading: false });
           if (pictures.hits.length === 0) {
             return toast.error(`No pictures with name: "${nextName}".`);
