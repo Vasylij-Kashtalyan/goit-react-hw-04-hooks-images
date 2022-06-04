@@ -8,21 +8,22 @@ const modalRoot = document.querySelector("#modal-root");
 function Modal({ onModalClose, children }) {
   useEffect(() => {
     window.addEventListener("keydown", onEscKeyDown);
-    return window.removeEventListener("keydown", onEscKeyDown);
+    return () => {
+      window.removeEventListener("keydown", onEscKeyDown);
+    };
   });
+
+  const onEscKeyDown = (evt) => {
+    if (evt.code === "Escape") {
+      onModalClose();
+    }
+  };
 
   const onBackdropClick = (evt) => {
     if (evt.currentTarget === evt.target) {
       onModalClose();
     }
   };
-
-  const onEscKeyDown = (evt) => {
-    if (evt.code === "ESCAPE") {
-      onModalClose();
-    }
-  };
-
   return createPortal(
     <div className={s.Overlay} onClick={onBackdropClick}>
       <div className={s.Modal}>

@@ -1,5 +1,5 @@
 import { API } from "./api/Fetch.js";
-import React, { Component } from "react";
+// import React, { Component } from "react";
 import { ToastContainer } from "react-toastify";
 import ImageGallery from "./components/ImageGallery";
 import { toast } from "react-toastify";
@@ -7,76 +7,69 @@ import Searchbar from "./components/Searchbar/Searchbar";
 import Loader from "./components/Loader/";
 import Button from "./components/Button";
 import s from "./components/ImageGallery/ImageGallery.module.css";
+import { useState, useEffect } from "react";
 
-class App extends Component {
-  state = {
-    totalPicture: 0,
-    loading: false,
-    pictures: [],
-    error: null,
-    name: "",
-    page: 1,
-  };
+function App() {
+  const [totalPicture, setTotalPicture] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [pictures, setPictures] = useState([]);
+  const [error, setError] = useState(null);
+  const [name, setName] = useState("");
+  const [page, setPage] = useState(1);
 
-  componentDidUpdate(prevProps, prevState) {
-    const nextName = this.state.name;
-    const nextPage = this.state.page;
+  useEffect(() => {
+    if (!name) {
+      return;
+    }
 
     try {
-      if (prevState.name !== nextName || prevState.page !== nextPage) {
-        this.setState({ loading: true });
+      if ({ name: name, page: page }) {
+        setLoading(true);
 
-        API(nextName, nextPage).then((pictures) => {
-          this.setState({ loading: false });
+        API(name).then((pictures) => {
+          setLoading(false);
           if (pictures.hits.length === 0) {
-            return toast.error(`No pictures with name: "${nextName}".`);
+            return toast.error(`No pictures with name: "${name}".`);
           }
 
-          this.setState((prevState) => ({
-            pictures: [...prevState.pictures, ...pictures.hits],
-            totalPicture: pictures.totalHits,
-            loading: false,
-          }));
+          setPictures((prevState) => [...prevState, ...pictures.hits]);
+          setTotalPicture(pictures.totalHits);
+          setLoading(false);
         });
       }
     } catch (error) {
-      this.setState({ error });
+      setError(error);
     }
-  }
+  }, [name, page]);
 
-  handleButtonMore = (ev) => {
-    this.setState(({ page }) => ({
-      page: page + 1,
-    }));
+  const handleButtonMore = (ev) => {
+    setPage((prevPage) => page + 1);
   };
 
-  resetPage = () => {
-    this.setState({ page: 1, pictures: [] });
+  const resetPage = () => {
+    setPage(1);
+    setPictures([]);
   };
 
-  handlerSearchBar = (name) => {
-    this.setState({ name });
-    this.resetPage();
+  const handlerSearchBar = (nameSearchbar) => {
+    setName(nameSearchbar);
+    resetPage();
   };
 
-  render() {
-    const { pictures, loading, totalPicture, page } = this.state;
+  return (
+    <div>
+      {loading && <Loader />}
+      <ToastContainer autoClose={3000} />
+      <Searchbar onSubmit={handlerSearchBar} />
+      <ImageGallery pictures={pictures} />
 
-    return (
-      <div>
-        {loading && <Loader />}
-        <ToastContainer autoClose={3000} />
-        <Searchbar onSubmit={this.handlerSearchBar} />
-        <ImageGallery pictures={pictures} />
-
-        <div className={s.boxButton}>
-          {pictures.length !== 0 && page !== Math.ceil(totalPicture / 12) && (
-            <Button onClickLoad={this.handleButtonMore} />
-          )}
-        </div>
+      <div className={s.boxButton}>
+        {pictures.length !== 0 && page !== Math.ceil(totalPicture / 12) && (
+          <Button onClickLoad={handleButtonMore} />
+        )}
       </div>
-    );
-  }
+    </div>
+  );
 }
 
 export default App;
