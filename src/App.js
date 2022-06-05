@@ -1,5 +1,4 @@
 import { API } from "./api/Fetch.js";
-// import React, { Component } from "react";
 import { ToastContainer } from "react-toastify";
 import ImageGallery from "./components/ImageGallery";
 import { toast } from "react-toastify";
@@ -26,7 +25,7 @@ function App() {
       if ({ name: name, page: page }) {
         setLoading(true);
 
-        API(name).then((pictures) => {
+        API(name, page).then((pictures) => {
           setLoading(false);
           if (pictures.hits.length === 0) {
             return toast.error(`No pictures with name: "${name}".`);
@@ -43,7 +42,7 @@ function App() {
   }, [name, page]);
 
   const handleButtonMore = (ev) => {
-    setPage((prevPage) => page + 1);
+    setPage((page) => page + 1);
   };
 
   const resetPage = () => {
